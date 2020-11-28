@@ -34,7 +34,6 @@ void MessageQueue<T>::send(T &&msg)
     std::lock_guard<std::mutex> lck(_mutex);
 
     // add msg to queue
-    std::cout << "   Message #" << msg << " will be added to the queue" << std::endl;
     _queue.push_back(std::move(msg));
 
     // notify client after adding new message into queue vector
