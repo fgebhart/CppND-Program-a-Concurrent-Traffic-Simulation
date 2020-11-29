@@ -53,7 +53,6 @@ void TrafficLight::waitForGreen()
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
     
-    std::cout << "Waiting for green..." << std::endl;
     TrafficLightPhase _phase;
     while (true)
     {
@@ -85,23 +84,30 @@ void TrafficLight::cycleThroughPhases()
     // and toggles the current phase of the traffic light between red and green and sends an update method 
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
+
+    auto updated = std::chrono::system_clock::now();
+    auto changed = std::chrono::system_clock::now();
+
+    // get random duration time in milliseconds
+    int min = 4000;
+    int max = 6000;
+    int randNum = rand() % (max - min + 1) + min;
     while (true)
     {
-        int min = 4;
-        int max = 6;
-        int randNum = rand() % (max - min + 1) + min;
-        std::this_thread::sleep_for(std::chrono::seconds(randNum));
-        if (_currentPhase == TrafficLightPhase::red) {
-            _currentPhase = TrafficLightPhase::green;
-        } else {
-            _currentPhase = TrafficLightPhase::red;
-        }
-        // wait 1ms between two cycles
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        // TODO send update message to MessageQueue using move semantics
-        _msg_queue.send(std::move(_currentPhase));
+        int deltaSinceChanged = std::chrono::duration_cast<std::chrono::milliseconds>(updated - changed).count();
 
+        if (deltaSinceChanged >= randNum) {
+            if (_currentPhase == TrafficLightPhase::red) {
+                _currentPhase = TrafficLightPhase::green;
+            }
+            else {
+                _currentPhase = TrafficLightPhase::red;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            changed = std::chrono::system_clock::now();
+            _msg_queue.send(std::move(_currentPhase));
+        }
+        updated = std::chrono::system_clock::now();
     }
-    
 }
 
