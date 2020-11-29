@@ -19,7 +19,7 @@ T MessageQueue<T>::receive()
 
     // get last element from queue
     T msg = std::move(_queue.back());
-    _queue.pop_back();
+    _queue.clear();
 
     return msg;
 }
@@ -103,10 +103,10 @@ void TrafficLight::cycleThroughPhases()
             else {
                 _currentPhase = TrafficLightPhase::red;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
             changed = std::chrono::system_clock::now();
             _msg_queue.send(std::move(_currentPhase));
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         updated = std::chrono::system_clock::now();
     }
 }
